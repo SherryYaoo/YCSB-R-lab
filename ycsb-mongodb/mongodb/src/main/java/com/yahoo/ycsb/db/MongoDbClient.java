@@ -15,6 +15,7 @@ import com.mongodb.AutoEncryptionSettings;
 import com.mongodb.ClientEncryptionSettings;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
@@ -97,6 +98,9 @@ public class MongoDbClient extends DB {
 
     /** The default read preference for the test */
     private static ReadPreference readPreference;
+
+    /** The default read concern for the test */
+    private static ReadConcern readConcern;
 
     /** Allow inserting batches to save time during load */
     private static Integer BATCHSIZE;
@@ -270,6 +274,7 @@ public class MongoDbClient extends DB {
                 .applyConnectionString(new ConnectionString(keyVaultUrls))
                 .readPreference(readPreference)
                 .writeConcern(writeConcern)
+                .readConcern(readConcern)
                 .build())
         .keyVaultNamespace(keyVaultNamespace)
         .kmsProviders(kmsProviders)
@@ -450,20 +455,17 @@ public class MongoDbClient extends DB {
                 case "acknowledged":
                     writeConcern = WriteConcern.ACKNOWLEDGED;
                     break;
-                case "journaled":
-                    writeConcern = WriteConcern.JOURNALED;
+                case "majority":
+                    writeConcern = WriteConcern.MAJORITY;
                     break;
                 case "replica_acknowledged":
                     writeConcern = WriteConcern.W2;
-                    break;
-                case "majority":
-                    writeConcern = WriteConcern.MAJORITY;
                     break;
                 default:
                     System.err.println("ERROR: Invalid writeConcern: '"
                             + writeConcernType
                             + "'. "
-                            + "Must be [ unacknowledged | acknowledged | journaled | replica_acknowledged | majority ]");
+                            + "Must be [ unacknowledged | acknowledged | majority | replica_acknowledged ]");
                     System.exit(1);
             }
 
@@ -473,22 +475,17 @@ public class MongoDbClient extends DB {
                 case "primary":
                     readPreference = ReadPreference.primary();
                     break;
-                case "primary_preferred":
-                    readPreference = ReadPreference.primaryPreferred();
-                    break;
                 case "secondary":
                     readPreference = ReadPreference.secondary();
                     break;
-                case "secondary_preferred":
-                    readPreference = ReadPreference.secondaryPreferred();
-                    break;
-                case "nearest":
-                    readPreference = ReadPreference.nearest();
+                case "majority":
+                    readPreference = ReadPreference.primary(); // Assuming you want to read from primary with majority read concern
+                    readConcern = ReadConcern.MAJORITY; // Using majority read concern
                     break;
                 default:
                     System.err.println("ERROR: Invalid readPreference: '"
                             + readPreferenceType
-                            + "'. Must be [ primary | primary_preferred | secondary | secondary_preferred | nearest ]");
+                            + "'. Must be [ primary | secondary | majority ]");
                     System.exit(1);
             }
 

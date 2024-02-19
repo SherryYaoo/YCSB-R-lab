@@ -70,11 +70,16 @@ See the next section for the list of configuration parameters for MongoDB.
  - options are :
   - `unacknowledged`
   - `acknowledged`
-  - `journaled`
   - `replica_acknowledged`
   - `majority`
 
-For example:
+- `mongodb.readPreference` default `primary`
 
+ - options are :
+  - `primary`
+  - `secondary`
+  - `majority`
+
+For example:
     ./bin/ycsb load mongodb -s -P workloads/workloada -p mongodb.writeConcern=majority
 
