@@ -83,3 +83,7 @@ See the next section for the list of configuration parameters for MongoDB.
 For example:
     ./bin/ycsb load mongodb -s -P workloads/workloada -p mongodb.writeConcern=majority
 
+./bin/ycsb load mongodb -s -P workloads/workloada -p "mongodb.writeConcern=acknowledged" > outputLoad.txt
+
+./bin/ycsb load mongodb -s -P workloads/workloada -p "mongodb.url=mongodb://localhost:28017,localhost:28018,localhost:28019/ycsb?replicaSet=rs0" -p "mongodb.writeConcern=acknowledged" > outputLoad.txt
+./bin/ycsb load mongodb -s -P workloads/workloada -p "mongodb.url=mongodb://localhost:27017" -p "mongodb.writeConcern=acknowledged" > output.txt

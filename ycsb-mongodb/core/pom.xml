@@ -32,6 +32,12 @@
       <version>7.7.0</version>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.mongodb</groupId>
+          <artifactId>mongodb-driver-core</artifactId>
+          <version>4.7.0</version>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
 </project>

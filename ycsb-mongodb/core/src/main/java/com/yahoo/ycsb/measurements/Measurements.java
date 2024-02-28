@@ -123,16 +123,28 @@ public class Measurements
      */
     public synchronized void measure(String operation, int latency)
     {
-        try
-        {
-            data.get(operation).measure(latency);
+        OneMeasurement m = data.get(operation);
+        if (m == null) {
+            // Operation not initialized, optionally initialize on demand
+            initMeasurement(operation);
+            m = data.get(operation);
         }
-        catch (java.lang.ArrayIndexOutOfBoundsException e)
-        {
-            System.out.println("ERROR: java.lang.ArrayIndexOutOfBoundsException - ignoring and continuing");
-            e.printStackTrace();
-            e.printStackTrace(System.out);
+        if (m != null) { // Check again in case initialization failed
+            m.measure(latency);
+        } else {
+            // Handle the case where the operation could not be initialized
+            System.err.println("Measurement for operation '" + operation + "' could not be initialized.");
         }
+//        try
+//        {
+//            data.get(operation).measure(latency);
+//        }
+//        catch (java.lang.ArrayIndexOutOfBoundsException e)
+//        {
+//            System.out.println("ERROR: java.lang.ArrayIndexOutOfBoundsException - ignoring and continuing");
+//            e.printStackTrace();
+//            e.printStackTrace(System.out);
+//        }
     }
 
     /**

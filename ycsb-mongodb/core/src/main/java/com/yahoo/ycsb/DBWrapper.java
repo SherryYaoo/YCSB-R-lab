@@ -17,12 +17,15 @@
 
 package com.yahoo.ycsb;
 
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
+import com.yahoo.ycsb.measurements.Measurements;
+
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
-
-import com.yahoo.ycsb.measurements.Measurements;
 
 /**
  * Wrapper around a "real" DB that measures latencies and counts return codes.
@@ -31,10 +34,15 @@ public class DBWrapper extends DB
 {
     DB _db;
     Measurements _measurements;
+    String readPreference;
+    String writeConcern;
+    Properties props;
+
 
     public DBWrapper(DB db)
     {
         _db=db;
+        props = _db.getProperties();
         _measurements=Measurements.getMeasurements();
         _measurements.init();
     }
@@ -90,8 +98,31 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.read(table,key,fields,result);
         long en=System.nanoTime();
-        _measurements.measure("READ",(int)((en-st)/1000));
-        _measurements.reportReturnCode("READ",res);
+        readPreference = props.getProperty("mongodb.readPreference");
+        if (readPreference == null) {
+            // Example: Setting a default, or you can choose to skip handling
+            readPreference = "primary"; // Default readPreference if not specified
+        }
+        switch (readPreference) {
+            case "primary":
+                _measurements.measure("READ CONSISTENT",(int)((en-st)/1000));
+                _measurements.reportReturnCode("READ CONSISTENT",res);
+                break;
+            case "secondary":
+                _measurements.measure("READ REPLICA",(int)((en-st)/1000));
+                _measurements.reportReturnCode("READ REPLICA",res);
+                break;
+            case "majority":
+                _measurements.measure("READ MAJORITY",(int)((en-st)/1000));
+                _measurements.reportReturnCode("READ MAJORITY",res);
+                break;
+            default:
+                System.err.println("ERROR: Invalid readPreference: '"
+                        + readPreference
+                        + "'. Must be [ primary | secondary | majority ]");
+                System.exit(1);
+        }
+
         return res;
     }
 
@@ -110,8 +141,26 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.scan(table,startkey,recordcount,fields,result);
         long en=System.nanoTime();
-        _measurements.measure("SCAN",(int)((en-st)/1000));
-        _measurements.reportReturnCode("SCAN",res);
+        readPreference = props.getProperty("mongodb.readPreference");
+        switch (readPreference) {
+            case "primary":
+                _measurements.measure("SCAN CONSISTENT", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("SCAN CONSISTENT", res);
+                break;
+            case "secondary":
+                _measurements.measure("SCAN REPLICA", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("SCAN REPLICA", res);
+                break;
+            case "majority":
+                _measurements.measure("SCAN MAJORITY", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("SCAN MAJORITY", res);
+                break;
+            default:
+                System.err.println("ERROR: Invalid readPreference: '"
+                        + readPreference
+                        + "'. Must be [ primary | secondary | majority ]");
+                System.exit(1);
+        }
         return res;
     }
 
@@ -129,8 +178,36 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.update(table,key,values);
         long en=System.nanoTime();
-        _measurements.measure("UPDATE",(int)((en-st)/1000));
-        _measurements.reportReturnCode("UPDATE",res);
+
+        writeConcern = props.getProperty("mongodb.writeConcern");
+        if (writeConcern == null) {
+            // If writeConcern is not specified, use a default value or skip setting.
+            // Example: Assuming 'acknowledged' as default:
+            writeConcern = "acknowledged"; // Or simply skip setting if that's preferable
+        }
+        switch (writeConcern) {
+            case "unacknowledged":
+                _measurements.measure("UPDATE NONE",(int)((en-st)/1000));
+                _measurements.reportReturnCode("UPDATE NONE",res);
+                break;
+            case "acknowledged":
+                _measurements.measure("UPDATE ONE",(int)((en-st)/1000));
+                _measurements.reportReturnCode("UPDATE ONE",res);
+                break;
+            case "majority":
+                _measurements.measure("UPDATE MAJORITY",(int)((en-st)/1000));
+                _measurements.reportReturnCode("UPDATE MAJORITY",res);
+                break;
+            case "replica_acknowledged":
+                _measurements.measure("UPDATE ALL",(int)((en-st)/1000));
+                _measurements.reportReturnCode("UPDATE ALL",res);
+                break;
+            default:
+                System.err.println("ERROR: Invalid writeConcern: '"
+                        + writeConcern
+                        + "'. Must be [ unacknowledged | acknowledged | majority | replica_acknowledged ]");
+                System.exit(1);
+        }
         return res;
     }
 
@@ -148,8 +225,39 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.insert(table,key,values);
         long en=System.nanoTime();
-        _measurements.measure("INSERT",(int)((en-st)/1000));
-        _measurements.reportReturnCode("INSERT",res);
+        if (props == null) {
+            System.err.println("Properties (props) is not initialized.");
+            return res; // Or consider throwing an exception or initializing props here
+        }
+        writeConcern = props.getProperty("mongodb.writeConcern");
+        // Ensure writeConcern is not null
+        if (writeConcern == null) {
+            System.err.println("writeConcern property is not set.");
+            return res; // Handle the error as appropriate
+        }
+        switch (writeConcern) {
+            case "unacknowledged":
+                _measurements.measure("INSERT NONE", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("INSERT NONE", res);
+                break;
+            case "acknowledged":
+                _measurements.measure("INSERT ONE", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("INSERT ONE", res);
+                break;
+            case "majority":
+                _measurements.measure("INSERT MAJORITY", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("INSERT MAJORITY", res);
+                break;
+            case "replica_acknowledged":
+                _measurements.measure("INSERT ALL", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("INSERT ALL", res);
+                break;
+            default:
+                System.err.println("ERROR: Invalid writeConcern: '"
+                        + writeConcern
+                        + "'. Must be [ unacknowledged | acknowledged | majority | replica_acknowledged ]");
+                System.exit(1);
+        }
         return res;
     }
 
@@ -165,8 +273,30 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.delete(table,key);
         long en=System.nanoTime();
-        _measurements.measure("DELETE",(int)((en-st)/1000));
-        _measurements.reportReturnCode("DELETE",res);
+        writeConcern = props.getProperty("mongodb.writeConcern");
+        switch (writeConcern) {
+            case "unacknowledged":
+                _measurements.measure("DELETE NONE", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("DELETE NONE", res);
+                break;
+            case "acknowledged":
+                _measurements.measure("DELETE ONE", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("DELETE ONE", res);
+                break;
+            case "majority":
+                _measurements.measure("DELETE MAJORITY", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("DELETE MAJORITY", res);
+                break;
+            case "replica_acknowledged":
+                _measurements.measure("DELETE ALL", (int) ((en - st) / 1000));
+                _measurements.reportReturnCode("DELETE ALL", res);
+                break;
+            default:
+                System.err.println("ERROR: Invalid writeConcern: '"
+                        + writeConcern
+                        + "'. Must be [ unacknowledged | acknowledged | majority | replica_acknowledged ]");
+                System.exit(1);
+        }
         return res;
     }
 }

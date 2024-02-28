@@ -1,0 +1,11 @@
+YCSB Client 0.1
+Command line: -db com.yahoo.ycsb.db.MongoDbClient -s -P workloads/workloada -p recordcount=1000 -p mongodb.writeConcern=majority -load
+[WORKLOAD], READ, 0.5%.
+[WORKLOAD], UPDATE, 0.5%.
+mongo connection created to mongodb://localhost:27017
+java.lang.NullPointerException: Cannot invoke "com.yahoo.ycsb.measurements.OneMeasurement.measure(int)" because the return value of "java.util.HashMap.get(Object)" is null
+	at com.yahoo.ycsb.measurements.Measurements.measure(Measurements.java:140)
+	at com.yahoo.ycsb.DBWrapper.insert(DBWrapper.java:238)
+	at com.yahoo.ycsb.workloads.CoreWorkload.doInsert(CoreWorkload.java:471)
+	at com.yahoo.ycsb.ClientThread.run(Client.java:257)
+java -cp /Users/sherryyao/Desktop/YCSB-R-lab/ycsb-mongodb/core/target/core-0.1.4.jar:/Users/sherryyao/Desktop/YCSB-R-lab/ycsb-mongodb/mongodb/target/mongodb-binding-0.1.4.jar:/Users/sherryyao/Desktop/YCSB-R-lab/ycsb-mongodb/mongodb/target/archive-tmp/mongodb-binding-0.1.4.jar com.yahoo.ycsb.Client -db com.yahoo.ycsb.db.MongoDbClient -s -P workloads/workloada -p recordcount=1000 -p mongodb.writeConcern=majority -load

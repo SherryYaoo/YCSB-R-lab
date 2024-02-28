@@ -11,14 +11,7 @@
 
 package com.yahoo.ycsb.db;
 
-import com.mongodb.AutoEncryptionSettings;
-import com.mongodb.ClientEncryptionSettings;
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ReadConcern;
-import com.mongodb.ReadPreference;
-import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -100,7 +93,7 @@ public class MongoDbClient extends DB {
     private static ReadPreference readPreference;
 
     /** The default read concern for the test */
-    private static ReadConcern readConcern;
+    private static ReadConcern readConcern = ReadConcern.LOCAL;
 
     /** Allow inserting batches to save time during load */
     private static Integer BATCHSIZE;
@@ -459,7 +452,7 @@ public class MongoDbClient extends DB {
                     writeConcern = WriteConcern.MAJORITY;
                     break;
                 case "replica_acknowledged":
-                    writeConcern = WriteConcern.W2;
+                    writeConcern = WriteConcern.W3;
                     break;
                 default:
                     System.err.println("ERROR: Invalid writeConcern: '"
@@ -521,6 +514,7 @@ public class MongoDbClient extends DB {
                 }
                 settingsBuilder.writeConcern(writeConcern);
                 settingsBuilder.readPreference(readPreference);
+                settingsBuilder.readConcern(readConcern);
 
                 String userPassword = username.equals("") ? "" : username + (password.equals("") ? "" : ":" + password) + "@";
 
