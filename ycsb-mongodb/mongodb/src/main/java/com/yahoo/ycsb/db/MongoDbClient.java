@@ -462,6 +462,26 @@ public class MongoDbClient extends DB {
                     System.exit(1);
             }
 
+        //     readPreference
+        //    String readPreferenceType = props.getProperty("mongodb.readPreference", "primary").toLowerCase();
+        //    switch (readPreferenceType) {
+        //        case "primary":
+        //            readPreference = ReadPreference.primary();
+        //            break;
+        //        case "secondary":
+        //            readPreference = ReadPreference.secondary();
+        //            break;
+        //        case "majority":
+        //            readPreference = ReadPreference.primary(); // Assuming you want to read from primary with majority read concern
+        //            readConcern = ReadConcern.MAJORITY; // Using majority read concern
+        //            break;
+        //        default:
+        //            System.err.println("ERROR: Invalid readPreference: '"
+        //                    + readPreferenceType
+        //                    + "'. Must be [ primary | secondary | majority ]");
+        //            System.exit(1);
+        //    }
+
             // readPreference
             String readPreferenceType = props.getProperty("mongodb.readPreference", "primary").toLowerCase();
             switch (readPreferenceType) {
@@ -471,14 +491,26 @@ public class MongoDbClient extends DB {
                 case "secondary":
                     readPreference = ReadPreference.secondary();
                     break;
-                case "majority":
-                    readPreference = ReadPreference.primary(); // Assuming you want to read from primary with majority read concern
-                    readConcern = ReadConcern.MAJORITY; // Using majority read concern
-                    break;
                 default:
                     System.err.println("ERROR: Invalid readPreference: '"
                             + readPreferenceType
-                            + "'. Must be [ primary | secondary | majority ]");
+                            + "'. Must be [ primary | secondary ]");
+                    System.exit(1);
+            }
+
+            // readConcern
+            String readConcernLevel = props.getProperty("mongodb.readConcern", "local").toLowerCase();
+            switch (readConcernLevel) {
+                case "local":
+                    readConcern = ReadConcern.LOCAL;
+                    break;
+                case "majority":
+                    readConcern = ReadConcern.MAJORITY;
+                    break;
+                default:
+                    System.err.println("ERROR: Invalid readConcern: '"
+                            + readConcernLevel
+                            + "'. Must be [ local | majority ]");
                     System.exit(1);
             }
 

@@ -66,24 +66,28 @@ See the next section for the list of configuration parameters for MongoDB.
 - `mongodb.database` default: `ycsb`
 
 - `mongodb.writeConcern` default `acknowledged`
-
  - options are :
   - `unacknowledged`
   - `acknowledged`
+  -  `majority`
   - `replica_acknowledged`
-  - `majority`
 
 - `mongodb.readPreference` default `primary`
-
  - options are :
   - `primary`
   - `secondary`
   - `majority`
 
+- `mongodb.readConcern` default `local`
+- options are :
+- `local`
+- `majority`
+
 For example:
-    ./bin/ycsb load mongodb -s -P workloads/workloada -p mongodb.writeConcern=majority
+./bin/ycsb load mongodb -s -P workloads/workloada -p mongodb.writeConcern=majority
 
 ./bin/ycsb load mongodb -s -P workloads/workloada -p "mongodb.writeConcern=acknowledged" > outputLoad.txt
 
-./bin/ycsb load mongodb -s -P workloads/workloada -p "mongodb.url=mongodb://localhost:28017,localhost:28018,localhost:28019/ycsb?replicaSet=rs0" -p "mongodb.writeConcern=acknowledged" > outputLoad.txt
-./bin/ycsb load mongodb -s -P workloads/workloada -p "mongodb.url=mongodb://localhost:27017" -p "mongodb.writeConcern=acknowledged" > output.txt
+./bin/ycsb load mongodb -s -P workloads/workloada -p recordcount=1000000 -p requestdistribution=uniform -threads 128 -p mongodb.url="mongodb://localhost:27016/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.5" -p "mongodb.writeConcern=acknowledged" -p "mongodb.readPreference=primary" > loadOnePrimary128A.txt
+
+./bin/ycsb run mongodb -s -P workloads/workloada -p recordcount=1000000 -p operationcount=100000 -p requestdistribution=uniform -threads 128 -p mongodb.url="mongodb://localhost:27016/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.5" -p "mongodb.writeConcern=acknowledged" -p "mongodb.readPreference=primary" > runOnePrimary128A.txt

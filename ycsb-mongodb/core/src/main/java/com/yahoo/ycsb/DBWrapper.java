@@ -34,8 +34,10 @@ public class DBWrapper extends DB
 {
     DB _db;
     Measurements _measurements;
+    String readConcern;
     String readPreference;
     String writeConcern;
+    String operationType;
     Properties props;
 
 
@@ -98,30 +100,49 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.read(table,key,fields,result);
         long en=System.nanoTime();
-        readPreference = props.getProperty("mongodb.readPreference");
-        if (readPreference == null) {
-            // Example: Setting a default, or you can choose to skip handling
-            readPreference = "primary"; // Default readPreference if not specified
+        readPreference = props.getProperty("mongodb.readPreference", "primary").toLowerCase();
+        readConcern = props.getProperty("mongodb.readConcern", "local").toLowerCase();
+//        if (readPreference == null) {
+//            // Example: Setting a default, or you can choose to skip handling
+//            readPreference = "primary"; // Default readPreference if not specified
+//        }
+//        switch (readPreference) {
+//            case "primary":
+//                _measurements.measure("READ CONSISTENT",(int)((en-st)/1000));
+//                _measurements.reportReturnCode("READ CONSISTENT",res);
+//                break;
+//            case "secondary":
+//                _measurements.measure("READ REPLICA",(int)((en-st)/1000));
+//                _measurements.reportReturnCode("READ REPLICA",res);
+//                break;
+//            case "majority":
+//                _measurements.measure("READ MAJORITY",(int)((en-st)/1000));
+//                _measurements.reportReturnCode("READ MAJORITY",res);
+//                break;
+//            default:
+//                System.err.println("ERROR: Invalid readPreference: '"
+//                        + readPreference
+//                        + "'. Must be [ primary | secondary | majority ]");
+//                System.exit(1);
+//        }
+//
+//        return res;
+//    }
+        if ("primary".equals(readPreference)) {
+            operationType = "READ PRIMARY";
+            if ("majority".equals(readConcern)) {
+                operationType = "READ MAJORITY";
+            }
+        } else if ("secondary".equals(readPreference)) {
+            operationType = "READ SECONDARY";
+        } else {
+            System.err.println("ERROR: Invalid readPreference/readConcern: '" + readPreference + "'. Must be [ primary | secondary ] '" + readConcern + "'. Must be [ local | majority ]");
+            System.exit(1);
         }
-        switch (readPreference) {
-            case "primary":
-                _measurements.measure("READ CONSISTENT",(int)((en-st)/1000));
-                _measurements.reportReturnCode("READ CONSISTENT",res);
-                break;
-            case "secondary":
-                _measurements.measure("READ REPLICA",(int)((en-st)/1000));
-                _measurements.reportReturnCode("READ REPLICA",res);
-                break;
-            case "majority":
-                _measurements.measure("READ MAJORITY",(int)((en-st)/1000));
-                _measurements.reportReturnCode("READ MAJORITY",res);
-                break;
-            default:
-                System.err.println("ERROR: Invalid readPreference: '"
-                        + readPreference
-                        + "'. Must be [ primary | secondary | majority ]");
-                System.exit(1);
-        }
+
+        // Measure and report based on operation type
+        _measurements.measure(operationType, (int) ((en - st) / 1000));
+        _measurements.reportReturnCode(operationType, res);
 
         return res;
     }
@@ -141,26 +162,46 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.scan(table,startkey,recordcount,fields,result);
         long en=System.nanoTime();
-        readPreference = props.getProperty("mongodb.readPreference");
-        switch (readPreference) {
-            case "primary":
-                _measurements.measure("SCAN CONSISTENT", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("SCAN CONSISTENT", res);
-                break;
-            case "secondary":
-                _measurements.measure("SCAN REPLICA", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("SCAN REPLICA", res);
-                break;
-            case "majority":
-                _measurements.measure("SCAN MAJORITY", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("SCAN MAJORITY", res);
-                break;
-            default:
-                System.err.println("ERROR: Invalid readPreference: '"
-                        + readPreference
-                        + "'. Must be [ primary | secondary | majority ]");
-                System.exit(1);
+
+        readPreference = props.getProperty("mongodb.readPreference", "primary").toLowerCase();
+        readConcern = props.getProperty("mongodb.readConcern", "local").toLowerCase();
+//        switch (readPreference) {
+//            case "primary":
+//                _measurements.measure("SCAN CONSISTENT", (int) ((en - st) / 1000));
+//                _measurements.reportReturnCode("SCAN CONSISTENT", res);
+//                break;
+//            case "secondary":
+//                _measurements.measure("SCAN REPLICA", (int) ((en - st) / 1000));
+//                _measurements.reportReturnCode("SCAN REPLICA", res);
+//                break;
+//            case "majority":
+//                _measurements.measure("SCAN MAJORITY", (int) ((en - st) / 1000));
+//                _measurements.reportReturnCode("SCAN MAJORITY", res);
+//                break;
+//            default:
+//                System.err.println("ERROR: Invalid readPreference: '"
+//                        + readPreference
+//                        + "'. Must be [ primary | secondary | majority ]");
+//                System.exit(1);
+//        }
+//        return res;
+
+        if ("primary".equals(readPreference)) {
+            operationType = "SCAN PRIMARY";
+            if ("majority".equals(readConcern)) {
+                operationType = "SCAN MAJORITY";
+            }
+        } else if ("secondary".equals(readPreference)) {
+            operationType = "SCAN SECONDARY";
+        } else {
+            System.err.println("ERROR: Invalid readPreference/readConcern: '" + readPreference + "'. Must be [ primary | secondary ] '" + readConcern + "'. Must be [ local | majority ]");
+            System.exit(1);
         }
+
+        // Measure and report based on operation type
+        _measurements.measure(operationType, (int) ((en - st) / 1000));
+        _measurements.reportReturnCode(operationType, res);
+
         return res;
     }
 
