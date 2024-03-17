@@ -239,14 +239,14 @@ public class DBWrapper extends DB
                 _measurements.measure("UPDATE MAJORITY",(int)((en-st)/1000));
                 _measurements.reportReturnCode("UPDATE MAJORITY",res);
                 break;
-            case "W3":
+            case "w3":
                 _measurements.measure("UPDATE ALL",(int)((en-st)/1000));
                 _measurements.reportReturnCode("UPDATE ALL",res);
                 break;
             default:
                 System.err.println("ERROR: Invalid writeConcern: '"
                         + writeConcern
-                        + "'. Must be [ unacknowledged | acknowledged | majority | W3 ]");
+                        + "'. Must be [ unacknowledged | acknowledged | majority | w3 ]");
                 System.exit(1);
         }
         return res;
@@ -289,14 +289,14 @@ public class DBWrapper extends DB
                 _measurements.measure("INSERT MAJORITY", (int) ((en - st) / 1000));
                 _measurements.reportReturnCode("INSERT MAJORITY", res);
                 break;
-            case "W3":
+            case "w3":
                 _measurements.measure("INSERT ALL", (int) ((en - st) / 1000));
                 _measurements.reportReturnCode("INSERT ALL", res);
                 break;
             default:
                 System.err.println("ERROR: Invalid writeConcern: '"
                         + writeConcern
-                        + "'. Must be [ unacknowledged | acknowledged | majority | W3 ]");
+                        + "'. Must be [ unacknowledged | acknowledged | majority | w3 ]");
                 System.exit(1);
         }
         return res;
@@ -328,14 +328,14 @@ public class DBWrapper extends DB
                 _measurements.measure("DELETE MAJORITY", (int) ((en - st) / 1000));
                 _measurements.reportReturnCode("DELETE MAJORITY", res);
                 break;
-            case "W3":
+            case "w3":
                 _measurements.measure("DELETE ALL", (int) ((en - st) / 1000));
                 _measurements.reportReturnCode("DELETE ALL", res);
                 break;
             default:
                 System.err.println("ERROR: Invalid writeConcern: '"
                         + writeConcern
-                        + "'. Must be [ unacknowledged | acknowledged | majority | W3 ]");
+                        + "'. Must be [ unacknowledged | acknowledged | majority | w3 ]");
                 System.exit(1);
         }
         return res;
