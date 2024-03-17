@@ -452,7 +452,7 @@ public class MongoDbClient extends DB {
                     writeConcern = WriteConcern.MAJORITY;
                     break;
                 case "w3":
-                    writeConcern = WriteConcern.W3;
+                    writeConcern = WriteConcern.W2;
                     break;
                 default:
                     System.err.println("ERROR: Invalid writeConcern: '"
