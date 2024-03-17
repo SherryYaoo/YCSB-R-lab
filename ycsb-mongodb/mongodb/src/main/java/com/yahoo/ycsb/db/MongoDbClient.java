@@ -451,14 +451,14 @@ public class MongoDbClient extends DB {
                 case "majority":
                     writeConcern = WriteConcern.MAJORITY;
                     break;
-                case "w3":
-                    writeConcern = WriteConcern.W2;
+                case "all":
+                    writeConcern = WriteConcern.W3;
                     break;
                 default:
                     System.err.println("ERROR: Invalid writeConcern: '"
                             + writeConcernType
                             + "'. "
-                            + "Must be [ unacknowledged | acknowledged | majority | w3 ]");
+                            + "Must be [ unacknowledged | acknowledged | majority | all ]");
                     System.exit(1);
             }
 
