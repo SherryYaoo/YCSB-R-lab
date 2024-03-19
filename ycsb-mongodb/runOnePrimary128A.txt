@@ -1,6 +1,0 @@
-YCSB Client 0.1
-Command line: -db com.yahoo.ycsb.db.MongoDbClient -s -P workloads/workloada -p recordcount=1000000 -p operationcount=100000 -p requestdistribution=uniform -threads 128 -p mongodb.url=mongodb://localhost:27016/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.5 -p mongodb.writeConcern=acknowledged -p mongodb.readPreference=primary -t
-[WORKLOAD], READ, 0.5%.
-[WORKLOAD], UPDATE, 0.5%.
-mongo connection created to mongodb://localhost:27016/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.5
-java -cp /Users/sherryyao/Desktop/YCSB-R-lab/ycsb-mongodb/core/target/core-0.1.4.jar:/Users/sherryyao/Desktop/YCSB-R-lab/ycsb-mongodb/mongodb/target/mongodb-binding-0.1.4.jar:/Users/sherryyao/Desktop/YCSB-R-lab/ycsb-mongodb/mongodb/target/archive-tmp/mongodb-binding-0.1.4.jar com.yahoo.ycsb.Client -db com.yahoo.ycsb.db.MongoDbClient -s -P workloads/workloada -p recordcount=1000000 -p operationcount=100000 -p requestdistribution=uniform -threads 128 -p mongodb.url=mongodb://localhost:27016/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.5 -p mongodb.writeConcern=acknowledged -p mongodb.readPreference=primary -t
