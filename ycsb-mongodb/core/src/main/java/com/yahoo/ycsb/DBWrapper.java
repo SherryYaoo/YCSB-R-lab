@@ -102,32 +102,7 @@ public class DBWrapper extends DB
         long en=System.nanoTime();
         readPreference = props.getProperty("mongodb.readPreference", "primary").toLowerCase();
         readConcern = props.getProperty("mongodb.readConcern", "local").toLowerCase();
-//        if (readPreference == null) {
-//            // Example: Setting a default, or you can choose to skip handling
-//            readPreference = "primary"; // Default readPreference if not specified
-//        }
-//        switch (readPreference) {
-//            case "primary":
-//                _measurements.measure("READ CONSISTENT",(int)((en-st)/1000));
-//                _measurements.reportReturnCode("READ CONSISTENT",res);
-//                break;
-//            case "secondary":
-//                _measurements.measure("READ REPLICA",(int)((en-st)/1000));
-//                _measurements.reportReturnCode("READ REPLICA",res);
-//                break;
-//            case "majority":
-//                _measurements.measure("READ MAJORITY",(int)((en-st)/1000));
-//                _measurements.reportReturnCode("READ MAJORITY",res);
-//                break;
-//            default:
-//                System.err.println("ERROR: Invalid readPreference: '"
-//                        + readPreference
-//                        + "'. Must be [ primary | secondary | majority ]");
-//                System.exit(1);
-//        }
-//
-//        return res;
-//    }
+
         if ("primary".equals(readPreference)) {
             operationType = "READ PRIMARY";
             if ("majority".equals(readConcern)) {
@@ -165,26 +140,6 @@ public class DBWrapper extends DB
 
         readPreference = props.getProperty("mongodb.readPreference", "primary").toLowerCase();
         readConcern = props.getProperty("mongodb.readConcern", "local").toLowerCase();
-//        switch (readPreference) {
-//            case "primary":
-//                _measurements.measure("SCAN CONSISTENT", (int) ((en - st) / 1000));
-//                _measurements.reportReturnCode("SCAN CONSISTENT", res);
-//                break;
-//            case "secondary":
-//                _measurements.measure("SCAN REPLICA", (int) ((en - st) / 1000));
-//                _measurements.reportReturnCode("SCAN REPLICA", res);
-//                break;
-//            case "majority":
-//                _measurements.measure("SCAN MAJORITY", (int) ((en - st) / 1000));
-//                _measurements.reportReturnCode("SCAN MAJORITY", res);
-//                break;
-//            default:
-//                System.err.println("ERROR: Invalid readPreference: '"
-//                        + readPreference
-//                        + "'. Must be [ primary | secondary | majority ]");
-//                System.exit(1);
-//        }
-//        return res;
 
         if ("primary".equals(readPreference)) {
             operationType = "SCAN PRIMARY";
@@ -219,29 +174,26 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.update(table,key,values);
         long en=System.nanoTime();
+        long duration = (en-st) / 1000;
 
         writeConcern = props.getProperty("mongodb.writeConcern");
         if (writeConcern == null) {
-            // If writeConcern is not specified, use a default value or skip setting.
-            // Example: Assuming 'acknowledged' as default:
-            writeConcern = "acknowledged"; // Or simply skip setting if that's preferable
+            writeConcern = "acknowledged";
         }
+
+        String updateLabel = "UPDATE ONE";
         switch (writeConcern) {
             case "unacknowledged":
-                _measurements.measure("UPDATE NONE",(int)((en-st)/1000));
-                _measurements.reportReturnCode("UPDATE NONE",res);
+                updateLabel = "UPDATE NONE";
                 break;
             case "acknowledged":
-                _measurements.measure("UPDATE ONE",(int)((en-st)/1000));
-                _measurements.reportReturnCode("UPDATE ONE",res);
+                updateLabel = "UPDATE ONE";
                 break;
             case "majority":
-                _measurements.measure("UPDATE MAJORITY",(int)((en-st)/1000));
-                _measurements.reportReturnCode("UPDATE MAJORITY",res);
+                updateLabel = "UPDATE MAJORITY";
                 break;
             case "all":
-                _measurements.measure("UPDATE ALL",(int)((en-st)/1000));
-                _measurements.reportReturnCode("UPDATE ALL",res);
+                updateLabel = "UPDATE ALL";
                 break;
             default:
                 System.err.println("ERROR: Invalid writeConcern: '"
@@ -249,6 +201,8 @@ public class DBWrapper extends DB
                         + "'. Must be [ unacknowledged | acknowledged | majority | all ]");
                 System.exit(1);
         }
+        _measurements.measure(updateLabel, (int) duration);
+        _measurements.reportReturnCode(updateLabel, res);
         return res;
     }
 
@@ -266,6 +220,8 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.insert(table,key,values);
         long en=System.nanoTime();
+        long duration = (en-st) / 1000;
+
         if (props == null) {
             System.err.println("Properties (props) is not initialized.");
             return res; // Or consider throwing an exception or initializing props here
@@ -276,22 +232,19 @@ public class DBWrapper extends DB
             System.err.println("writeConcern property is not set.");
             return res; // Handle the error as appropriate
         }
+        String insertLabel = "INSERT ONE";
         switch (writeConcern) {
             case "unacknowledged":
-                _measurements.measure("INSERT NONE", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("INSERT NONE", res);
+                insertLabel = "INSERT NONE";
                 break;
             case "acknowledged":
-                _measurements.measure("INSERT ONE", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("INSERT ONE", res);
+                insertLabel = "INSERT ONE";
                 break;
             case "majority":
-                _measurements.measure("INSERT MAJORITY", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("INSERT MAJORITY", res);
+                insertLabel = "INSERT MAJORITY";
                 break;
             case "all":
-                _measurements.measure("INSERT ALL", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("INSERT ALL", res);
+                insertLabel = "INSERT ALL";
                 break;
             default:
                 System.err.println("ERROR: Invalid writeConcern: '"
@@ -299,6 +252,8 @@ public class DBWrapper extends DB
                         + "'. Must be [ unacknowledged | acknowledged | majority | all ]");
                 System.exit(1);
         }
+        _measurements.measure(insertLabel, (int) duration);
+        _measurements.reportReturnCode(insertLabel, res);
         return res;
     }
 
@@ -314,23 +269,22 @@ public class DBWrapper extends DB
         long st=System.nanoTime();
         int res=_db.delete(table,key);
         long en=System.nanoTime();
+        long duration = (en-st) / 1000;
+
         writeConcern = props.getProperty("mongodb.writeConcern");
+        String deleteLabel = "DELETE ONE";
         switch (writeConcern) {
             case "unacknowledged":
-                _measurements.measure("DELETE NONE", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("DELETE NONE", res);
+                deleteLabel = "DELETE NONE";
                 break;
             case "acknowledged":
-                _measurements.measure("DELETE ONE", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("DELETE ONE", res);
+                deleteLabel = "DELETE ONE";
                 break;
             case "majority":
-                _measurements.measure("DELETE MAJORITY", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("DELETE MAJORITY", res);
+                deleteLabel = "DELETE MAJORITY";
                 break;
             case "all":
-                _measurements.measure("DELETE ALL", (int) ((en - st) / 1000));
-                _measurements.reportReturnCode("DELETE ALL", res);
+                deleteLabel = "DELETE ALL";
                 break;
             default:
                 System.err.println("ERROR: Invalid writeConcern: '"
@@ -338,6 +292,8 @@ public class DBWrapper extends DB
                         + "'. Must be [ unacknowledged | acknowledged | majority | all ]");
                 System.exit(1);
         }
+        _measurements.measure(deleteLabel, (int) duration);
+        _measurements.reportReturnCode(deleteLabel, res);
         return res;
     }
 }
